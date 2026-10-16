@@ -1,19 +1,10 @@
 import { useState, type SubmitEvent } from "react";
-import api from "@/lib/axios";
-import Button from "@/components/ui/button";
-import Label from "@/components/ui/label";
-import Input from "@/components/ui/input";
-import Textarea from "@/components/ui/textarea";
-
-type Recipe = {
-  id: number;
-  name: string;
-  cuisine: string;
-  difficulty: string;
-  cookTimeMinutes: number;
-  ingredients: string[];
-  instructions: string[];
-};
+import { updateRecipeService, type Recipe } from "@/services/recipe-service";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select } from "@/components/ui/select";
 
 type UpdateRecipeFormProps = {
   recipe: Recipe;
@@ -27,12 +18,14 @@ export default function UpdateRecipeForm({ recipe, onSuccess }: UpdateRecipeForm
   const [cookTimeMinutes, setCookTimeMinutes] = useState(recipe.cookTimeMinutes);
   const [ingredients, setIngredients] = useState(recipe.ingredients.join("\n"));
   const [instructions, setInstructions] = useState(recipe.instructions.join("\n"));
+  const [error, setError] = useState("");
 
   const handleUpdateRecipe = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError("");
 
     try {
-      const response = await api.put(`/recipes/${recipe.id}`, {
+      const updatedRecipe = await updateRecipeService(recipe.id, {
         name,
         cuisine,
         difficulty,
@@ -41,45 +34,50 @@ export default function UpdateRecipeForm({ recipe, onSuccess }: UpdateRecipeForm
         instructions: instructions.split("\n").filter((item) => item.trim() !== ""),
       });
 
-      onSuccess(response.data);
-      alert("Recipe updated!");
+      onSuccess(updatedRecipe);
     } catch (error) {
-      console.error(error);
+      setError(typeof error === "object" && error !== null && "response" in error
+        ? ((error as { response?: { data?: { message?: string } } }).response?.data?.message || "Unable to update recipe.")
+        : "Unable to connect to the API.");
     }
   };
 
+  // One column on phones, two on larger screens; separate row and column gaps.
   return (
-    <form onSubmit={handleUpdateRecipe} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <form onSubmit={handleUpdateRecipe} className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
       <div>
-        <Label>Name</Label>
-        <Input type="text" value={name} onChange={(e) => setName(e.target.value)} />
+        <Label htmlFor="update-recipe-name">Name</Label>
+        <Input id="update-recipe-name" type="text" value={name} onChange={(e) => setName(e.target.value)} />
       </div>
 
       <div>
-        <Label>Cuisine</Label>
-        <Input type="text" value={cuisine} onChange={(e) => setCuisine(e.target.value)} />
+        <Label htmlFor="update-recipe-cuisine">Cuisine</Label>
+        <Input id="update-recipe-cuisine" type="text" value={cuisine} onChange={(e) => setCuisine(e.target.value)} />
       </div>
 
       <div>
-        <Label>Difficulty</Label>
-        <Input type="text" value={difficulty} onChange={(e) => setDifficulty(e.target.value)} />
+        <Label htmlFor="update-recipe-difficulty">Difficulty</Label>
+        <Select id="update-recipe-difficulty" value={difficulty} onChange={(e) => setDifficulty(e.target.value as Recipe["difficulty"])}>
+          <option>Easy</option><option>Medium</option><option>Hard</option>
+        </Select>
       </div>
 
       <div>
-        <Label>Cook Time (minutes)</Label>
-        <Input type="number" value={cookTimeMinutes} onChange={(e) => setCookTimeMinutes(Number(e.target.value))} />
+        <Label htmlFor="update-recipe-cook-time">Cook Time (minutes)</Label>
+        <Input id="update-recipe-cook-time" type="number" min="0" value={cookTimeMinutes} onChange={(e) => setCookTimeMinutes(Number(e.target.value))} />
       </div>
 
       <div className="sm:col-span-2">
-        <Label>Ingredients (one per line)</Label>
-        <Textarea value={ingredients} onChange={(e) => setIngredients(e.target.value)} rows={5} />
+        <Label htmlFor="update-recipe-ingredients">Ingredients (one per line)</Label>
+        <Textarea id="update-recipe-ingredients" value={ingredients} onChange={(e) => setIngredients(e.target.value)} rows={5} />
       </div>
 
       <div className="sm:col-span-2">
-        <Label>Instructions (one per line)</Label>
-        <Textarea value={instructions} onChange={(e) => setInstructions(e.target.value)} rows={5} />
+        <Label htmlFor="update-recipe-instructions">Instructions (one per line)</Label>
+        <Textarea id="update-recipe-instructions" value={instructions} onChange={(e) => setInstructions(e.target.value)} rows={5} />
       </div>
 
+      {error && <p role="alert" className="text-sm text-red-600 sm:col-span-2">{error}</p>}
       <Button type="submit" className="w-full sm:col-span-2">
         Save Changes
       </Button>

@@ -5,10 +5,10 @@ type InputProps = InputHTMLAttributes<HTMLInputElement> & {
   error?: string;
 };
 
-export default function Input({ className, error, ...props }: InputProps) {
+export function Input({ className, error, ...props }: InputProps) {
   return (
     <div>
-      <input className={cn("w-full rounded-md border px-3 py-2 text-sm", error ? "border-red-500" : "border-gray-200", className)} {...props} />
+      <input className={cn("w-full rounded-xl border bg-white/60 px-3 py-2.5 text-sm text-emerald-950 outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/15", error ? "border-red-500" : "border-emerald-900/15", className)} {...props} />
       {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
     </div>
   );

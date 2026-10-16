@@ -1,20 +1,10 @@
 import { useState, type SubmitEvent } from "react";
-import api from "@/lib/axios";
-import Button from "@/components/ui/button";
-import Label from "@/components/ui/label";
-import Input from "@/components/ui/input";
-import Textarea from "@/components/ui/textarea";
-
-type Recipe = {
-  id: number;
-  image: string;
-  name: string;
-  cuisine: string;
-  mealType: string[];
-  difficulty: string;
-  cookTimeMinutes: number;
-  tags: string[];
-};
+import { createRecipeService, type Recipe } from "@/services/recipe-service";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select } from "@/components/ui/select";
 
 type AddRecipeFormProps = {
   onSuccess: (newRecipe: Recipe) => void;
@@ -48,13 +38,14 @@ export default function AddRecipeForm({ onSuccess }: AddRecipeFormProps) {
   const [name, setName] = useState("");
   const [image, setImage] = useState("");
   const [cuisine, setCuisine] = useState("");
-  const [difficulty, setDifficulty] = useState("");
+  const [difficulty, setDifficulty] = useState<"Easy" | "Medium" | "Hard">("Easy");
   const [cookTimeMinutes, setCookTimeMinutes] = useState("");
   const [mealType, setMealType] = useState("");
   const [tags, setTags] = useState("");
   const [ingredients, setIngredients] = useState("");
   const [instructions, setInstructions] = useState("");
   const [errors, setErrors] = useState<FormErrors>({});
+  const [submitError, setSubmitError] = useState("");
 
   // show error if empty, remove error if has value
   const checkField = (field: keyof FormErrors, value: string) => {
@@ -66,6 +57,7 @@ export default function AddRecipeForm({ onSuccess }: AddRecipeFormProps) {
 
   const handleAddRecipe = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setSubmitError("");
 
     const values = { name, image, cuisine, difficulty, cookTimeMinutes, mealType, tags, ingredients, instructions };
 
@@ -89,7 +81,7 @@ export default function AddRecipeForm({ onSuccess }: AddRecipeFormProps) {
     }
 
     try {
-      const response = await api.post("/recipes/add", {
+      const newRecipe = await createRecipeService({
         name,
         image,
         cuisine,
@@ -101,64 +93,69 @@ export default function AddRecipeForm({ onSuccess }: AddRecipeFormProps) {
         instructions: instructions.split("\n").filter((item) => item.trim() !== ""),
       });
 
-      onSuccess(response.data);
-      alert("Recipe added!");
+      onSuccess(newRecipe);
     } catch (error) {
-      console.error(error);
+      setSubmitError(typeof error === "object" && error !== null && "response" in error
+        ? ((error as { response?: { data?: { message?: string } } }).response?.data?.message || "Unable to create recipe.")
+        : "Unable to connect to the API.");
     }
   };
 
+  // One column on phones, two on larger screens; separate row and column gaps.
   return (
-    <form onSubmit={handleAddRecipe} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <form onSubmit={handleAddRecipe} className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
       <div>
-        <Label error={errors.name}>Name</Label>
-        <Input type="text" value={name} onChange={(e) => { setName(e.target.value); checkField("name", e.target.value); }} onBlur={() => checkField("name", name)} error={errors.name} />
+        <Label htmlFor="recipe-name" error={errors.name}>Name</Label>
+        <Input id="recipe-name" type="text" value={name} onChange={(e) => { setName(e.target.value); checkField("name", e.target.value); }} onBlur={() => checkField("name", name)} error={errors.name} />
       </div>
 
       <div>
-        <Label error={errors.image}>Image URL</Label>
-        <Input type="url" value={image} onChange={(e) => { setImage(e.target.value); checkField("image", e.target.value); }} onBlur={() => checkField("image", image)} placeholder="https://example.com/image.jpg" error={errors.image} />
+        <Label htmlFor="recipe-image" error={errors.image}>Image URL</Label>
+        <Input id="recipe-image" type="url" value={image} onChange={(e) => { setImage(e.target.value); checkField("image", e.target.value); }} onBlur={() => checkField("image", image)} placeholder="https://example.com/image.jpg" error={errors.image} />
       </div>
 
       <div>
-        <Label error={errors.cuisine}>Cuisine</Label>
-        <Input type="text" value={cuisine} onChange={(e) => { setCuisine(e.target.value); checkField("cuisine", e.target.value); }} onBlur={() => checkField("cuisine", cuisine)} error={errors.cuisine} />
+        <Label htmlFor="recipe-cuisine" error={errors.cuisine}>Cuisine</Label>
+        <Input id="recipe-cuisine" type="text" value={cuisine} onChange={(e) => { setCuisine(e.target.value); checkField("cuisine", e.target.value); }} onBlur={() => checkField("cuisine", cuisine)} error={errors.cuisine} />
       </div>
 
       <div>
-        <Label error={errors.difficulty}>Difficulty</Label>
-        <Input type="text" value={difficulty} onChange={(e) => { setDifficulty(e.target.value); checkField("difficulty", e.target.value); }} onBlur={() => checkField("difficulty", difficulty)} error={errors.difficulty} />
+        <Label htmlFor="recipe-difficulty" error={errors.difficulty}>Difficulty</Label>
+        <Select id="recipe-difficulty" value={difficulty} onChange={(e) => setDifficulty(e.target.value as "Easy" | "Medium" | "Hard")}>
+          <option>Easy</option><option>Medium</option><option>Hard</option>
+        </Select>
       </div>
 
       <div>
-        <Label error={errors.cookTimeMinutes}>Cook Time (minutes)</Label>
-        <Input type="number" value={cookTimeMinutes} onChange={(e) => { setCookTimeMinutes(e.target.value); checkField("cookTimeMinutes", e.target.value); }} onBlur={() => checkField("cookTimeMinutes", cookTimeMinutes)} error={errors.cookTimeMinutes} />
+        <Label htmlFor="recipe-cook-time" error={errors.cookTimeMinutes}>Cook Time (minutes)</Label>
+        <Input id="recipe-cook-time" type="number" min="0" value={cookTimeMinutes} onChange={(e) => { setCookTimeMinutes(e.target.value); checkField("cookTimeMinutes", e.target.value); }} onBlur={() => checkField("cookTimeMinutes", cookTimeMinutes)} error={errors.cookTimeMinutes} />
       </div>
 
       <div className="sm:col-span-2">
-        <Label error={errors.mealType}>Meal Type (one per line)</Label>
+        <Label htmlFor="recipe-meal-type" error={errors.mealType}>Meal Type (one per line)</Label>
         <Textarea
-          value={mealType} onChange={(e) => { setMealType(e.target.value); checkField("mealType", e.target.value); }} onBlur={() => checkField("mealType", mealType)} rows={3} placeholder={"Breakfast\nLunch\nDinner"} error={errors.mealType} />
+          id="recipe-meal-type" value={mealType} onChange={(e) => { setMealType(e.target.value); checkField("mealType", e.target.value); }} onBlur={() => checkField("mealType", mealType)} rows={3} placeholder={"Breakfast\nLunch\nDinner"} error={errors.mealType} />
       </div>
 
       <div className="sm:col-span-2">
-        <Label error={errors.tags}>Tags (one per line)</Label>
+        <Label htmlFor="recipe-tags" error={errors.tags}>Tags (one per line)</Label>
         <Textarea
-          value={tags} onChange={(e) => { setTags(e.target.value); checkField("tags", e.target.value); }} onBlur={() => checkField("tags", tags)} rows={3} placeholder={"Italian\nPizza"} error={errors.tags} />
+          id="recipe-tags" value={tags} onChange={(e) => { setTags(e.target.value); checkField("tags", e.target.value); }} onBlur={() => checkField("tags", tags)} rows={3} placeholder={"Italian\nPizza"} error={errors.tags} />
       </div>
 
       <div className="sm:col-span-2">
-        <Label error={errors.ingredients}>Ingredients (one per line)</Label>
+        <Label htmlFor="recipe-ingredients" error={errors.ingredients}>Ingredients (one per line)</Label>
         <Textarea
-          value={ingredients} onChange={(e) => { setIngredients(e.target.value); checkField("ingredients", e.target.value); }} onBlur={() => checkField("ingredients", ingredients)} rows={3} error={errors.ingredients} />
+          id="recipe-ingredients" value={ingredients} onChange={(e) => { setIngredients(e.target.value); checkField("ingredients", e.target.value); }} onBlur={() => checkField("ingredients", ingredients)} rows={3} error={errors.ingredients} />
       </div>
 
       <div className="sm:col-span-2">
-        <Label error={errors.instructions}>Instructions (one per line)</Label>
+        <Label htmlFor="recipe-instructions" error={errors.instructions}>Instructions (one per line)</Label>
         <Textarea
-          value={instructions} onChange={(e) => { setInstructions(e.target.value); checkField("instructions", e.target.value); }} onBlur={() => checkField("instructions", instructions)} rows={3} error={errors.instructions} />
+          id="recipe-instructions" value={instructions} onChange={(e) => { setInstructions(e.target.value); checkField("instructions", e.target.value); }} onBlur={() => checkField("instructions", instructions)} rows={3} error={errors.instructions} />
       </div>
 
+      {submitError && <p role="alert" className="text-sm text-red-600 sm:col-span-2">{submitError}</p>}
       <Button type="submit" className="w-full sm:col-span-2">
         Add Recipe
       </Button>
