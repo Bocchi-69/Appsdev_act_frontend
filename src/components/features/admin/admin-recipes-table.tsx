@@ -1,8 +1,8 @@
 import { Table } from "@/components/ui/table";
 import { Tag } from "@/components/ui/tag";
-import type { Recipe } from "@/services/recipe-service";
+import type { AdminRecipe } from "@/services/recipe-service";
 
-export type AdminRecipe = Recipe & { userId: string };
+export type { AdminRecipe } from "@/services/recipe-service";
 
 type AdminRecipesTableProps = {
   recipes: AdminRecipe[];
@@ -22,12 +22,13 @@ export function AdminRecipesTable({ recipes, loading }: AdminRecipesTableProps) 
           <th scope="col">Difficulty</th>
           <th scope="col">Cook time</th>
           <th scope="col">Owner ID</th>
+          <th scope="col">Owner Name</th>
         </tr>
       </thead>
       <tbody>
         {!loading && recipes.length === 0 && (
           <tr>
-            <td colSpan={6} className="text-center">No recipes have been created yet.</td>
+            <td colSpan={7} className="text-center">No recipes have been created yet.</td>
           </tr>
         )}
         {recipes.map(function renderRecipe(recipe) {
@@ -44,6 +45,7 @@ export function AdminRecipesTable({ recipes, loading }: AdminRecipesTableProps) 
               <td><Tag>{recipe.difficulty}</Tag></td>
               <td>{recipe.cookTimeMinutes} mins</td>
               <td className="font-mono text-xs">{recipe.userId}</td>
+              <td>{recipe.ownerName || "Unnamed user"}</td>
             </tr>
           );
         })}

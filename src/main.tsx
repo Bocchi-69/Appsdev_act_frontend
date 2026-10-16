@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router";
 import HomePage from "@/pages/user/home";
 import RecipePage from "@/pages/user/recipe";
-import AdminPage from "@/pages/admin";
+import AdminPage from "@/pages/admin/home";
 import AuthLayout from "@/pages/auth/layout";
 import LoginPage from "@/pages/auth/login";
 import SignupPage from "@/pages/auth/signup";

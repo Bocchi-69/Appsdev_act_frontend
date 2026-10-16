@@ -14,6 +14,11 @@ export type Recipe = {
 };
 
 // Type for Recipe Input but without id
+export type AdminRecipe = Recipe & {
+  userId: string;
+  ownerName: string | null;
+};
+
 export type RecipeInput = Omit<Recipe, "id">;
 
 // Update Recipe but partial update meaning we can update only some fields not all fields
@@ -51,5 +56,5 @@ export async function deleteRecipeService(id: string) {
 // Get All Recipes Service (Admin)
 export async function getAllRecipesService() {
   const response = await http.get("/recipes/v1/get-all-recipes");
-  return response.data.data.recipes as (Recipe & { userId: string })[];
+  return response.data.data.recipes as AdminRecipe[];
 }
