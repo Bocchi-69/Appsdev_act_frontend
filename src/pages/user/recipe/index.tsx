@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 
-import { getRecipeService, deleteRecipeService, type Recipe } from "@/services/recipe-service";
+import { getRecipeService, type Recipe } from "@/services/recipe-service";
 
 import RecipeMeta from "@/components/common/recipe-meta";
 import { Modal } from "@/components/ui/modal";
@@ -15,7 +15,6 @@ export function RecipeDetails() {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
-  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -44,20 +43,6 @@ export function RecipeDetails() {
   }, [id]);
 
   if (!id) return null;
-
-  const recipeId = id;
-
-  async function handleDelete() {
-    if (!confirm("Are you sure you want to delete this recipe?")) return;
-    setDeleting(true);
-    try {
-      await deleteRecipeService(recipeId);
-      window.location.href = "/user";
-    } catch {
-      setDeleting(false);
-      setError("Unable to delete this recipe. Please try again.");
-    }
-  }
 
   function openForm() {
     setOpen(true);
@@ -109,18 +94,15 @@ export function RecipeDetails() {
                   {recipe.cuisine} cuisine • {recipe.mealType.join(", ")} • {recipe.difficulty}
                 </p>
               </div>
-              <div className="absolute top-4 right-4 flex gap-2">
-                <Button variant="ghost" size="sm" onClick={openForm} className="bg-white/90 text-brown-800 hover:bg-white">
-                  Update
-                </Button>
+              <div className="absolute top-4 right-4">
                 <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={handleDelete}
-                  disabled={deleting}
-                  className="bg-white/90 text-rosybrown-700 hover:bg-white disabled:opacity-60"
+                  onClick={openForm}
+                  className="recipe-edit-button rounded-full border border-white/30 bg-saffron-700 px-5 py-2.5 text-sm font-semibold text-white shadow-large hover:-translate-y-0.5 hover:bg-saffron-800 focus-visible:outline-white"
                 >
-                  {deleting ? "Deleting…" : "Delete"}
+                  <svg className="mr-2 inline-block h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                    <path d="m15.5 5.5 3 3M4 20l4.2-.8L19 8.4a2.1 2.1 0 0 0-3-3L5.2 16.2 4 20Z" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  Update recipe
                 </Button>
               </div>
             </div>
