@@ -7,10 +7,25 @@ export default function AuthLayout() {
 
   if (ready && user) return <Navigate to={user.role === "ADMIN" ? "/admin" : "/user"} replace />;
   return (
-    <main className="flex min-h-svh items-center justify-center bg-[radial-gradient(ellipse_at_top,_#245c4c,_#102e28_65%)] px-4 py-12">
-      <div className="w-full max-w-md">
-        <AuthHeader />
-        {ready && <Outlet />}
+    <main className="auth-shell">
+      <div className="auth-layout">
+        <section className="auth-showcase" aria-label="Recipe Book introduction">
+          <img
+            className="auth-showcase__image"
+            src="https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?auto=format&fit=crop&w=1400&q=85"
+            alt=""
+            fetchPriority="high"
+          />
+          <div className="auth-showcase__overlay" />
+          <div className="auth-showcase__content">
+            <AuthHeader />
+            <p className="auth-showcase__quote">A home for the recipes you love, and the ones you’re about to.</p>
+            <div className="auth-showcase__signature"><span /> Good food, gathered here <span /></div>
+          </div>
+        </section>
+        <section className="auth-panel" aria-label="Account access">
+          {ready && <Outlet />}
+        </section>
       </div>
     </main>
   );

@@ -36,17 +36,18 @@ export default function UpdateRecipeForm({ recipe, onSuccess }: UpdateRecipeForm
 
       onSuccess(updatedRecipe);
     } catch (error) {
-      setError(typeof error === "object" && error !== null && "response" in error
-        ? ((error as { response?: { data?: { message?: string } } }).response?.data?.message || "Unable to update recipe.")
-        : "Unable to connect to the API.");
+      setError(
+        typeof error === "object" && error !== null && "response" in error
+          ? ((error as { response?: { data?: { message?: string } } }).response?.data?.message || "Unable to update recipe.")
+          : "Unable to connect to the API."
+      );
     }
   };
 
-  // One column on phones, two on larger screens; separate row and column gaps.
   return (
-    <form onSubmit={handleUpdateRecipe} className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
+    <form onSubmit={handleUpdateRecipe} className="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-2">
       <div>
-        <Label htmlFor="update-recipe-name">Name</Label>
+        <Label htmlFor="update-recipe-name">Recipe Name</Label>
         <Input id="update-recipe-name" type="text" value={name} onChange={(e) => setName(e.target.value)} />
       </div>
 
@@ -58,7 +59,9 @@ export default function UpdateRecipeForm({ recipe, onSuccess }: UpdateRecipeForm
       <div>
         <Label htmlFor="update-recipe-difficulty">Difficulty</Label>
         <Select id="update-recipe-difficulty" value={difficulty} onChange={(e) => setDifficulty(e.target.value as Recipe["difficulty"])}>
-          <option>Easy</option><option>Medium</option><option>Hard</option>
+          <option>Easy</option>
+          <option>Medium</option>
+          <option>Hard</option>
         </Select>
       </div>
 
@@ -77,8 +80,8 @@ export default function UpdateRecipeForm({ recipe, onSuccess }: UpdateRecipeForm
         <Textarea id="update-recipe-instructions" value={instructions} onChange={(e) => setInstructions(e.target.value)} rows={5} />
       </div>
 
-      {error && <p role="alert" className="text-sm text-red-600 sm:col-span-2">{error}</p>}
-      <Button type="submit" className="w-full sm:col-span-2">
+      {error && <p role="alert" className="text-sm text-rosybrown-600 font-medium sm:col-span-2">{error}</p>}
+      <Button type="submit" className="w-full sm:col-span-2 py-3 text-base">
         Save Changes
       </Button>
     </form>

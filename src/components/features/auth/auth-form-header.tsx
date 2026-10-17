@@ -3,16 +3,11 @@ type AuthFormHeaderProps = {
   description: string;
 };
 
-// Reuse the same heading style while each auth page supplies its own text.
 export function AuthFormHeader({ title, description }: AuthFormHeaderProps) {
   return (
-    <header className="text-center">
-      <h2 className="text-xl font-semibold tracking-tight text-emerald-950">
-        {title}
-      </h2>
-      <p className="mt-2 text-sm leading-relaxed text-emerald-950/65">
-        {description}
-      </p>
+    <header className="text-center mb-8">
+      <h2 className="text-2xl font-display font-bold tracking-tight text-brown-800">{title}</h2>
+      <p className="mt-2 text-sm leading-relaxed text-brown-500/80">{description}</p>
     </header>
   );
 }

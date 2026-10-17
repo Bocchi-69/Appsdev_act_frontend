@@ -16,36 +16,35 @@ type RecipeCardProps = {
   onDelete: (id: string) => void;
 };
 
-export default function RecipeCard({id, image, name, cuisine, mealType, difficulty, cookTimeMinutes, tags, onDelete}: RecipeCardProps) {
+export default function RecipeCard({ id, image, name, cuisine, mealType, difficulty, cookTimeMinutes, tags, onDelete }: RecipeCardProps) {
   return (
-    <Card className="group flex h-full flex-col transition-shadow hover:shadow-lg hover:shadow-emerald-950/10">
-      <div className="h-56 overflow-hidden bg-emerald-100">
-        <img src={image} alt={name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+    <Card className="recipe-card group flex h-full flex-col border-biscuit-200 hover:border-saffron-300 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-brown-900/10" padding={false}>
+      <div className="h-60 overflow-hidden relative bg-biscuit-300">
+        <img src={image} alt={name} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-brown-900/45 to-transparent" />
+        <div className="absolute top-4 right-4"><Tag variant="olive">{difficulty}</Tag></div>
       </div>
 
-      <div className="flex flex-1 flex-col gap-4 p-5">
-        <h3 className="text-lg font-semibold tracking-tight text-emerald-950">{name}</h3>
+      <div className="flex flex-1 flex-col gap-4 p-5 sm:p-6">
+        <div className="flex items-center justify-between">
+          <h3 className="line-clamp-1 text-xl font-display font-semibold tracking-tight text-brown-800">{name}</h3>
+        </div>
 
-        <RecipeMeta
-          cuisine={cuisine}
-          mealType={mealType}
-          difficulty={difficulty}
-          cookTimeMinutes={cookTimeMinutes}
-        />
+        <RecipeMeta cuisine={cuisine} mealType={mealType} difficulty={difficulty} cookTimeMinutes={cookTimeMinutes} />
 
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-2 mb-2">
           {tags.map((tag) => (
-            <Tag key={tag}>{tag}</Tag>
+            <Tag key={tag} variant="brown">{tag}</Tag>
           ))}
         </div>
 
-        <div className="grid grid-cols-2 gap-2 mt-auto pt-2">
+        <div className="mt-auto pt-3 border-t border-biscuit-200 grid grid-cols-2 gap-2">
           <Link to={`/recipe/${id}`}>
-            <Button className="w-full">View</Button>
+            <Button variant="outline" className="w-full text-sm py-2">
+              View Recipe
+            </Button>
           </Link>
-          <Button onClick={() => onDelete(id)} className="bg-rose-50 text-rose-700 hover:bg-rose-100">
-            Delete
-          </Button>
+          <Button variant="danger" className="w-full text-sm py-2" onClick={() => onDelete(id)}>Delete</Button>
         </div>
       </div>
     </Card>

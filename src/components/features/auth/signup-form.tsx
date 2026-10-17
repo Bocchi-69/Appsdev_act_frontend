@@ -10,7 +10,7 @@ function getErrorMessage(error: unknown) {
     const response = (error as { response?: { data?: { message?: string } } }).response;
     if (response?.data?.message) return response.data.message;
   }
-  return "Could not connect to the API. Check that the API server is running.";
+  return "Could not connect to the API. Please check that the API server is running.";
 }
 
 export function SignupForm() {
@@ -22,14 +22,12 @@ export function SignupForm() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
-  // Keep field values in React state; the auth context calls the API service.
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
     setBusy(true);
     try {
       const currentUser = await signup(name, email, password);
-      // Navigate after the context has received the authenticated user.
       const destination = currentUser.role === "ADMIN" ? "/admin" : "/user";
       navigate(destination, { replace: true });
     } catch (requestError) {
@@ -42,7 +40,7 @@ export function SignupForm() {
   return (
     <form onSubmit={handleSubmit} className="mt-8 grid gap-5">
       <div>
-        <Label htmlFor="auth-name">Name</Label>
+        <Label htmlFor="auth-name">Full Name</Label>
         <Input id="auth-name" autoComplete="name" required minLength={2} value={name} onChange={(event) => setName(event.target.value)} />
       </div>
       <div>
@@ -51,11 +49,13 @@ export function SignupForm() {
       </div>
       <div>
         <Label htmlFor="auth-password">Password</Label>
-        <Input id="auth-password" type="password" autoComplete={"new-password"} required minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} />
+        <Input id="auth-password" type="password" autoComplete="new-password" required minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} />
       </div>
-      <p className="-mt-2 text-xs text-gray-500">Use at least 8 characters, including one uppercase letter and one number.</p>
-      {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
-      <Button type="submit" disabled={busy} className="mt-1 bg-emerald-900 py-3 font-medium hover:bg-emerald-950 disabled:cursor-wait disabled:opacity-60">{busy ? "Please wait…" : "Create account"}</Button>
+      <p className="-mt-2 text-xs text-brown-500/70 font-medium">Use at least 8 characters, including one uppercase letter and one number.</p>
+      {error && <p role="alert" className="text-sm text-rosybrown-600 font-medium">{error}</p>}
+      <Button type="submit" disabled={busy} className="mt-2 py-3 text-base font-medium disabled:cursor-wait disabled:opacity-60">
+        {busy ? "Creating account…" : "Create account"}
+      </Button>
     </form>
   );
 }

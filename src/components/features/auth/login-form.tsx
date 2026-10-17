@@ -10,7 +10,7 @@ function getErrorMessage(error: unknown) {
     const response = (error as { response?: { data?: { message?: string } } }).response;
     if (response?.data?.message) return response.data.message;
   }
-  return "Could not connect to the API. Check that the API server is running.";
+  return "Could not connect to the API. Please check that the API server is running.";
 }
 
 export function LoginForm() {
@@ -22,14 +22,12 @@ export function LoginForm() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
-  // Keep field values in React state; the auth context calls the API service.
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
     setBusy(true);
     try {
       const currentUser = await login(email, password);
-      // Navigate after the context has received the authenticated user.
       const destination = currentUser.role === "ADMIN" ? "/admin" : "/user";
       navigate(destination, { replace: true });
     } catch (requestError) {
@@ -47,11 +45,13 @@ export function LoginForm() {
       </div>
       <div>
         <Label htmlFor="auth-password">Password</Label>
-        <Input id="auth-password" type="password" autoComplete={"current-password"} required minLength={1} value={password} onChange={(event) => setPassword(event.target.value)} />
+        <Input id="auth-password" type="password" autoComplete="current-password" required minLength={1} value={password} onChange={(event) => setPassword(event.target.value)} />
       </div>
 
-      {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
-      <Button type="submit" disabled={busy} className="mt-1 bg-emerald-900 py-3 font-medium hover:bg-emerald-950 disabled:cursor-wait disabled:opacity-60">{busy ? "Please wait…" : "Sign in"}</Button>
+      {error && <p role="alert" className="text-sm text-rosybrown-600 font-medium">{error}</p>}
+      <Button type="submit" disabled={busy} className="mt-2 py-3 text-base font-medium disabled:cursor-wait disabled:opacity-60">
+        {busy ? "Signing in…" : "Sign in"}
+      </Button>
     </form>
   );
 }

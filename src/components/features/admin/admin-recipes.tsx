@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { getAllRecipesService } from "@/services/recipe-service";
 import { Button } from "@/components/ui/button";
 import { AdminRecipesTable, type AdminRecipe } from "./admin-recipes-table";
+import { Card } from "@/components/ui/card";
 
-// This feature owns the recipe request, refresh button, and request state.
 export function AdminRecipes() {
   const [recipes, setRecipes] = useState<AdminRecipe[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,7 +35,6 @@ export function AdminRecipes() {
 
     loadAllRecipes();
 
-    // Ignore late responses after leaving the page or starting a new request.
     function cleanup() {
       active = false;
     }
@@ -44,23 +43,26 @@ export function AdminRecipes() {
   }, [reload]);
 
   function handleRefresh() {
-    // Changing this value runs the fetching effect again.
-    setReload(function incrementReload(currentReload) {
-      return currentReload + 1;
-    });
+    setReload((currentReload) => currentReload + 1);
   }
 
   return (
     <section aria-label="All recipes">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-        <p>{loading ? "Loading recipes…" : `${recipes.length} recipes across all users`}</p>
+        <div>
+          <p className="text-sm font-medium text-brown-700">
+            {loading ? "Loading recipes…" : `${recipes.length} recipes across all users`}
+          </p>
+        </div>
         <Button variant="secondary" disabled={loading} onClick={handleRefresh}>
-          Refresh
+          {loading ? "Refreshing…" : "Refresh"}
         </Button>
       </div>
 
       {error ? (
-        <p role="alert" className="rounded-xl bg-rose-50 p-4 text-rose-700">{error}</p>
+        <Card className="p-6 rounded-xl border border-rosybrown-200 bg-rosybrown-50">
+          <p role="alert" className="text-sm text-rosybrown-700 font-medium">{error}</p>
+        </Card>
       ) : (
         <AdminRecipesTable recipes={recipes} loading={loading} />
       )}
